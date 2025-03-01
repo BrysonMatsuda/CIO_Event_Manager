@@ -1,1 +1,1 @@
-# PersonalProject
+# CIO Event Manager
