@@ -1,0 +1,104 @@
+{% extends "./org_base.html" %}
+
+{% block content_inner %}
+<div class="card mt-4 shadow-none rounded border-0">
+    <div class="card-header bg-dark text-white py-2 pb-3 d-flex justify-content-between align-items-center">
+
+        <h3 class="ps-2 py-2 fw-light">Events</h3>
+        {% if user.is_common_user  %}
+        {% if is_moderator or user == organization.owner %}
+        <a href="{% url 'projects:add_event_for_org' org_id=organization.pk %}" class="btn btn-success text-white">Add
+            Event</a>
+        {%endif%}
+        {% endif %}
+    </div>
+    <div class="card-body">
+        
+
+
+        <ul class="list-group mb-2">
+            {% for event in events %}
+            
+            {% if user.is_authenticated and is_member or user.is_pma_admin %}
+            <li class="mb-2 list-group-item d-flex flex-wrap justify-content-between card-hover align-items-start p-3 align-items-center mb-1">
+                <a href="{% url 'projects:event_view' event.id %}" class="text-decoration-none flex-grow-1">
+                    <div class="text-dark" style="margin-top: 10px;">
+                        <h4>{{ event.name }}</h4>
+                        {% if event.image %}
+                        <img src="{{ event.image.url }}" alt="{{ event.name }}" class="img-thumbnail mb-3"
+                             style="max-width: 170px;">
+                        {% endif %}
+                        <p>
+                            <small>{{ event.start_datetime }}</small><br>
+                            <small>{{ event.end_datetime }}</small><br>
+                        </p>
+                        {{ event.location }}<br>
+                        <span class="text-muted overflow-hidden">Created by: {{ event.owner.username }}</span>
+                    </div>
+                </a>
+                
+
+                {% if user.username == event.owner.username or is_moderator or user.is_pma_admin %}
+                <div class="d-flex flex-column ms-auto mb-auto h-100" style="margin-top: -10px;">
+                    <form action="{% url 'projects:delete_event' org_id=organization.pk event_id=event.pk %}"
+                          method="POST" style="display:inline;" class="text-end" onsubmit="return confirmDelete()">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger " style="white-space: nowrap;">
+                            Delete
+                        </button>
+                    
+                        {% if user == event.owner or user == organization.owner or is_moderator%}
+                        {%if not user.is_pma_admin%}
+                        <a href="{% url 'projects:edit_event' event.id %}"
+                           class="btn btn-dark ms-0 text-decoration-none">
+                            Edit
+                        </a>
+                        {%endif%}
+                    </form>
+
+                    {% endif %}
+                </div>
+                {% endif %}
+            </li>
+            {% endif %}
+            {% empty %}
+            <li class="list-group-item">No events found for {{ organization.organization_name }}</li>
+            {% endfor %}
+        </ul>
+
+    </div>
+    <div class="card-footer bg-dark">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">&laquo; First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <a class="page-link" href="#">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a>
+                </li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+<script>
+    function confirmDelete() {
+        return confirm("Are you sure you want to delete event?");
+    }
+</script>
+
+{% endblock content_inner%}

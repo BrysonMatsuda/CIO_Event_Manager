@@ -1,0 +1,180 @@
+{% extends "./generic.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Profile</h2>
+    <hr>
+
+    <!-- User Info -->
+
+
+            <div class="card mb-4 border-0 border-rounded border-bottom">
+                <div class="card-header bg-dark">
+                    <h5 class="card-title pt-2 text-white">Account Information</h5>
+                </div>
+                <div class="card-body bg-light">
+                    <div class="row">
+                    <div class="col-lg-2 col-3 align-self-center ">
+                        <img src="{% if profile_pic_url %}{{ profile_pic_url }}{% else %}{% static 'projects/default.jpg' %}{% endif %}" alt="Profile Picture" class="img-fluid rounded w-100 border">
+                    </div>
+                    <div class="col-lg-10 col-9">
+                        <ul class="list-group list-group-flush rounded">
+                        <li class="list-group-item"><strong>Username:</strong> {{ user.username }}</li>
+                        <li class="list-group-item"><strong>Email:</strong> {{ user.email }}</li>
+                            <li class="list-group-item"><strong>Joined on:</strong> {{ user.date_joined|date:"F j, Y" }}</li>
+                        </ul>
+                        </div>
+                        </div>
+                </div>
+            </div>
+
+            <div class="card mb-4 border-0 border-rounded border-bottom">
+                <div class="card-body rounded bg-light">
+
+                    <div class="list-group-item d-flex justify-content-between flex-column flex-lg-row flex-md-row align-items-center">
+                    <h5 class="card-title">My Organizations</h5>
+                        </div>
+                    <hr>
+                    {% if organizations %}
+                    <ul class="list-group list-group-flush">
+                        {% for organization in organizations %}
+                        <li class="rounded list-group-item d-flex justify-content-between align-items-center mb-1 border-0 border-bottom">
+                            <div>
+                                <strong>{{ organization.organization_name }}</strong><br>
+                                <small>Owner: {{ organization.owner.username }}</small>
+                            </div>
+                            <div>
+                                {% if organization.owner == user %}
+                                <!-- Delete button for owner -->
+                                <form method="POST" action="{% url 'projects:delete_organization' organization.id %}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this organization? This action cannot be undone.');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </form>
+                                {% else %}
+                                <!-- Leave button for members or moderators -->
+                                <form method="POST" action="{% url 'projects:leave_organization' organization.id %}" class="d-inline" onsubmit="return confirm('Are you sure you want to leave this organization?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-warning">Leave</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted"><em>You haven't joined any organizations yet.</em></p>
+                    {% endif %}
+                </div>
+            </div>
+
+    <!-- Current Projects (Events) -->
+<div class="card mb-4 border-0 rounded">
+    <div class="card-body bg-light rounded border-0 border-bottom">
+
+        <div class="list-group-item d-flex justify-content-between flex-column flex-lg-row flex-md-row align-items-center">
+        <h5 class="card-title">Your Current Events</h5>
+</div>
+        <hr>
+        {% if current_events %}
+        <ul class="list-group">
+            {% for event in current_events %}
+            <li class="list-group-item mb-2 p-3 list-group-item-action card-hover">
+
+                <a href="{% url 'projects:event_view' event.id %}" class="text-decoration-none text-dark">
+                    <div>
+                        <h4>{{ event.name }}</h4>
+                        <p>
+                            <small>Start: {{ event.start_datetime }}</small> <br>
+                            <small>End: {{ event.end_datetime }}</small> <br>
+                        </p>
+                        <hr>
+                        Location: {{ event.location }} <br>
+                        <div class="text-muted">Organized by: {{ event.organization }}</div>
+                    </div>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No current events.</p>
+        {% endif %}
+    </div>
+</div>
+
+    <!-- Upcoming Projects (Events) -->
+    <div class="card mb-4 rounded border-0 border-bottom">
+        <div class="card-body bg-light rounded">
+            <div class="list-group-item d-flex justify-content-between flex-column flex-lg-row flex-md-row align-items-center">
+                <h5 class="card-title flex-wrap align-self-lg-end d-flex">Your Upcoming Events</h5>
+
+            <a href="{% url 'export_ics' %}" class="p-2 mb-1 btn btn-dark">Export Calendar (.ics)</a>
+                </div>
+
+            <hr>
+            {% if upcoming_events %}
+
+            <ul class="list-group">
+                {% for event in upcoming_events %}
+                <li class="list-group-item mb-2 p-3 list-group-item-action card-hover">
+
+                    <a href="{% url 'projects:event_view' event.id %}" class="text-decoration-none text-dark">
+                     <div>
+                <h4>{{ event.name }}</h4>
+                <p><small class="">{{ event.start_datetime }}</small> <br>
+
+                <small>{{ event.end_datetime }}</small> <br></p>
+                         <hr>
+               Location: {{ event.location }} <br>
+                         <div class="text-muted">Organized by: {{ event.organization }}</div>
+
+            </div>
+                    </a>
+                </li>
+
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>No upcoming events.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- button for ics -->
+
+
+    <!-- Past Projects (Events) -->
+    <div class="card mb-4 border-0 rounded">
+        <div class="card-body bg-light rounded border-0 border-bottom">
+
+            <div class="list-group-item d-flex justify-content-between flex-column flex-lg-row flex-md-row align-items-center">
+            <h5 class="card-title">Your Past Events</h5>
+                </div>
+            <hr>
+            {% if past_events %}
+            <ul class="list-group">
+                {% for event in past_events %}
+                <li class="list-group-item mb-2 p-3 list-group-item-action card-hover">
+
+                    <a href="{% url 'projects:event_view' event.id %}" class="text-decoration-none text-dark">
+                     <div>
+                <h4>{{ event.name }}</h4>
+                <p><small class="">{{ event.start_datetime }}</small> <br>
+                <small>{{ event.end_datetime }}</small> <br></p>
+                         <hr>
+                Location: {{ event.location }} <br>
+
+                         <div class="text-muted">Organized by: {{ event.organization }}</div>
+            </div>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>No past events.</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

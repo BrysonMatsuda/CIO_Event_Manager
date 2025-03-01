@@ -1,0 +1,126 @@
+{% extends "./org_base.html" %}
+{% load static %}
+
+{% block content_inner %}
+
+<div class="row">
+    <div class="col-12 col-lg-6">
+        <div class="card mb-3 border-0 rounded shadow-none border-bottom">
+            <div class="card-header text-white bg-dark text-center">
+                <h4 class="m-1 fw-light">Members</h4>
+            </div>
+
+            <div class="card-body">
+                <ul class="list-group">
+                     {% if current_user_info_member %}
+
+                    <li class="list-group-item ">
+                        <div class="row">
+                            <div class="col-3 align-self-center">
+                                <img src="{% if current_user_info_member.profile_pic_url %}{{ current_user_info_member.profile_pic_url }}{% else %}{% static 'projects/default.jpg' %}{% endif %}"
+                                     alt="Profile Picture" class="img-fluid rounded w-100 border ">
+                            </div>
+                            <div class="col-9">
+                                <h5 class="card-title"> {{current_user_info_member.user.username }}<small class="text-muted fw-light"> (you)</small></h5>
+                                <p class="card-text"><small> {{current_user_info_member.user.email }}</small></p>
+                                <p class="card-text"><small class="text-muted">Joined on {{ current_user_info_member.joined_on|date:"F j, Y" }}</small></p>
+                            </div>
+                        </div>
+                    </li>
+
+                    <hr>
+                    {% endif %}
+                </ul>
+
+                <ul class="list-group" style="overflow-y: scroll; max-height: 30rem;">
+
+                    {% for membership in members_with_pics %}
+                    {% if current_user_info_member.user != membership.user %}
+                    <li class="list-group-item">
+
+                        <div class="row">
+                            <div class="col-3 align-self-center">
+                                <img src="{% if membership.profile_pic_url %}{{ membership.profile_pic_url }}{% else %}{% static 'projects/default.jpg' %}{% endif %}"
+                                     alt="Profile Picture" class="img-fluid rounded w-100 border ">
+                            </div>
+                            <div class="col-9">
+                                <h5 class="card-title"> {{ membership.user.username }}</h5>
+                                <p class="card-text"><small> {{ membership.user.email }}</small></p>
+                                <p class="card-text"><small class="text-muted">Joined on {{ membership.joined_on|date:"F j, Y" }}</small></p>
+                            </div>
+                        </div>
+                    </li>
+                    {% endif %}
+                       {%empty%}
+
+                        <p class="text-muted px-1"><em>There are currently no members in the organization</em></p>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6  ">
+        <div class="card mb-3 rounded border-0 shadow-none border-bottom">
+            <div class="card-header text-white bg-dark text-center">
+                <h4 class="m-1 fw-light">Moderators</h4>
+            </div>
+           <div class="card-body">
+                <ul class="list-group justify-content-center" >
+                    {% if current_user_info_moderator%}
+
+                    <li class="list-group-item ">
+                        <div class="row">
+                            <div class="col-3 align-self-center">
+                                <img src="{% if current_user_info_moderator.profile_pic_url %}{{ current_user_info_moderator.profile_pic_url }}{% else %}{% static 'projects/default.jpg' %}{% endif %}"
+                                     alt="Profile Picture" class="img-fluid rounded w-100 border ">
+                            </div>
+                            <div class="col-9">
+                                <h5 class="card-title"> {{current_user_info_moderator.user.username }}<small class="text-muted fw-light"> (you)</small></h5>
+                                <p class="card-text"><small> {{ current_user_info_moderator.user.email }}</small></p>
+                                <p class="card-text"><small class="text-muted">Joined on {{ current_user_info_moderator.joined_on|date:"F j, Y" }}</small></p>
+                            </div>
+                        </div>
+                    </li>
+
+                    <hr>
+                    {% endif %}
+                </ul>
+                                   <ul class="list-group justify-content-center" style="overflow-y: scroll; max-height: 30rem;" >
+
+                    {% for moderator in moderators_with_pics %}
+                                        {% if current_user_info_moderator.user != moderator.user %}
+
+                    <li class="list-group-item mb-1 ">
+
+                        <div class="row">
+                            <div class="col-3 align-self-center">
+                                <img src="{% if moderator.profile_pic_url %}{{ moderator.profile_pic_url }}{% else %}{% static 'projects/default.jpg' %}{% endif %}"
+                                     alt="Profile Picture" class="img-fluid rounded w-100 border ">
+                            </div>
+                            <div class="col-9">
+                                <h5 class="card-title"> {{ moderator.user.username }}</h5>
+                                <p class="card-text"><small> {{ moderator.user.email }}</small></p>
+                                <p class="card-text"><small class="text-muted">Joined on {{ moderator.joined_on|date:"F j, Y" }}</small></p>
+                            </div>
+                        </div>
+
+                    </li>
+                    {%endif%}
+                     {%empty%}
+
+                        <p class="text-muted px-1"><em>There are currently no moderators for the organization</em></p>
+                    {% endfor %}
+                </ul>
+               <div class="text-center">
+                                {% if user == organization.owner and not user.is_pma_admin %}
+                                <button class="btn btn-warning mt-2"><a class="text-decoration-none text-dark"
+                                                                        href="{% url 'projects:manage_moderators' organization.id %}">Manage</a>
+                                </button>
+                                {% endif %}
+                            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content_inner%}

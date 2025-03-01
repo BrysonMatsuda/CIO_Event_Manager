@@ -1,0 +1,44 @@
+{% extends './generic.html' %}
+
+{% block content %}
+<div class="card mt-3 mb-3 border-0">
+    <div class="card-header pt-4 pb-4 d-flex justify-content-between align-items-center bg-dark text-white">
+
+<h3 class="ms-1 me-2">Manage Moderators for <strong><em>{{ organization.organization_name }}</em></strong></h3>
+                <button onclick="history.back()" class="btn btn-light mb-2">Back</button>
+</div>
+<form method="POST">
+    {% csrf_token %}
+    <div class="card-body">
+    <ul class="list-group m-3">
+        {% for user in members %}
+        <li class="list-group-item card-hover" onclick="toggleCheckbox(this)" style="cursor: pointer;">
+            <input class="mx-3" type="checkbox" name="moderators" value="{{ user.id }}"
+                   {% if user.id in current_moderators %}checked{% endif %}>
+            {{ user.username }}
+        </li>
+        {%empty%}
+        <li class="list-group-item">
+        <p class="text-muted"><em>There are currently no members to select from.</em></p>
+        </li>
+        {% endfor %}
+    </ul>
+
+        {% if members %}
+        <button type="submit" class="btn btn-success m-3 mt-2 p-2" onclick="history.back()">Save Changes</button>
+        {%endif%}
+    </div>
+    <div class="card-footer p-3 bg-dark text-end">
+        </div>
+</form>
+
+</div>
+
+<script>
+function toggleCheckbox(listItem) {
+    const checkbox = listItem.querySelector('input[type="checkbox"]');
+
+    checkbox.checked = !checkbox.checked;
+}
+</script>
+{% endblock %}

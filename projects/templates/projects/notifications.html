@@ -1,0 +1,31 @@
+{% extends "./generic.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Notifications</h2>
+    <hr>
+    {% if upcoming_events %}
+        <ul class="list-group text-dark m-4">
+            {% for event in upcoming_events %}
+                <li class="list-group-item card-hover text-dark text-decoration-none">
+                                    <a href="{% url 'projects:event_view' event.id %}" class="text-decoration-none text-dark flex-grow-1">
+
+                    <h5>{{ event.name }}</h5>
+                                        <hr>
+                {% if event.image %}
+                <img src="{{ event.image.url }}" alt="{{ event.name }}" class="img-thumbnail mb-3" style="max-width: 170px;">
+                {% endif %}
+                    <p>
+                        <strong>Starts at:</strong> {{ event.start_datetime|date:"H:i" }} <br>
+                        <strong>Location:</strong> {{ event.location }} <br>
+
+                    </p>
+                                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No upcoming events within the next 12 hour.</p>
+    {% endif %}
+</div>
+{% endblock %}

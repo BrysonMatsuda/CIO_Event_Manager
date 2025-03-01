@@ -1,0 +1,30 @@
+{% extends "./generic.html" %}
+
+{% block content %}
+<div class="container p-2">
+
+    <div class="d-flex justify-content-center mb-3">
+        <div class="card bg-light mt-2 w-75 border-0">
+            <h3 class=" card-header p-3 ps-4 pe-4 bg-dark text-white d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                Create New Organization</h3>
+            <div class="card-body m-3 ps-4">
+                {% if user.is_authenticated %}
+                <form method="post" class="p-4 mx-auto" style="max-width: 600px;">
+                    {% csrf_token %}
+                    <div class="form-group mb-3">
+                        {{ form.organization_name.label_tag }}
+                       {{ form.organization_name }}
+                    </div>
+                    <button type="submit" class="btn btn-success mt-3">Create Organization</button>
+                </form>
+                {% else %}
+                <p>You must be logged in to create an organization.</p>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-dark">
+
+    </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "./generic.html" %}
+
+{% block content %}
+<div class="card m-4 border-0">
+    <div class="card-header pt-4 pb-4 d-flex justify-content-between align-items-center bg-dark text-white">
+    <h2 class="ms-1">Add Event</h2>
+        {%if organization%}
+<a href="{% url 'projects:members_org_events' organization.id %}" class="btn btn-light mb-2">Back</a>
+
+        {%endif%}
+    </div>
+
+        <div class="card-body bg-light border-0">
+<form method="POST" enctype="multipart/form-data" class="p-4 mx-auto" style="max-width: 600px;">
+    {% csrf_token %}
+
+    <div class="form-group mb-3">
+        {{ form.name.label_tag }}
+        {{ form.name }}
+        {% if form.name.errors %}
+                    <div class="text-danger">
+                        {% for error in form.name.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+    </div>
+
+    <div class="form-group mb-3">
+        {{ form.start_datetime.label_tag }}
+        {{ form.start_datetime }}
+        {% if form.start_datetime.errors %}
+                    <div class="text-danger">
+                        {% for error in form.start_datetime.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+    </div>
+
+    <div class="form-group mb-3">
+        {{ form.end_datetime.label_tag }}
+        {{ form.end_datetime }}
+        {% if form.end_datetime.errors %}
+                    <div class="text-danger">
+                        {% for error in form.end_datetime.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+    </div>
+
+    <div class="form-group mb-3">
+        {{ form.location.label_tag }}
+        {{ form.location }}
+        {% if form.location.errors %}
+                    <div class="text-danger">
+                        {% for error in form.location.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+    </div>
+
+  <div class="form-group mb-3">
+    {% if organization %}
+        <label>Organization</label>
+        <p class="form-control-plaintext">{{ organization.organization_name }}</p>
+    {% else %}
+        <label>{{ form.organization.label }}</label>
+        {{ form.organization }}
+    {% endif %}
+
+    {% if form.organization.errors %}
+        <div class="text-danger">
+            {% for error in form.organization.errors %}
+                <p>{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+    <div class="form-group mb-3">
+        {{ form.image.label_tag }}
+        {{ form.image }}
+    </div>
+    <div class="form-group mb-3">
+        {{ form.sponsor.label_tag }}
+        {{ form.sponsor }}
+    </div>
+    <div class="form-group mb-3">
+        {{ form.deliverable.label_tag }}
+        {{ form.deliverable }}
+    </div>
+
+    <div class="text-center">
+        <button type="submit" class="btn btn-success">Add Event</button>
+    </div>
+</form>
+
+        </div>
+        <div class="card-footer bg-dark">
+            </div>
+
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+    flatpickr(".datetimepicker", {
+        enableTime: true,           // Allow both date and time selection
+        dateFormat: "Y-m-d h:i K",  // Format for date and time with AM/PM
+        time_24hr: false,           // Use 12-hour time format
+        minuteIncrement: 15         // 15-minute increments for time
+    });
+</script>
+{% endblock %}

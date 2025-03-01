@@ -1,0 +1,67 @@
+{% extends "./generic.html" %}
+
+{% block content %}
+<div class="card mt-4 border-0 ">
+    <div class="ps-4 pe-4 p-3 card-header bg-dark text-white d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+        <h1 class="">All Events</h1>
+        <div class="col-lg-2">
+        </div>
+    </div>
+    <div class="card-body bg-light">
+    <ul class="list-group mb-4">
+        {% for event in events %}
+        <a href="{% url 'projects:event_view' event.id %}" class="hover-card text-decoration-none text-dark">
+        <li class="list-group-item d-flex justify-content-between p-3 align-items-start mb-1 card-hover">
+
+            <div style="margin-top: 10px;">
+                <h4>{{ event.name }}</h4>
+                <p><small class="">{{ event.start_datetime }}</small> <br>
+                <small>{{ event.end_datetime }}</small> <br></p>
+                <hr>
+                {{ event.location }} <br>
+                <span class="text-muted">Organized by: {{ event.organization.organization_name }}</span>
+                </div>
+             <div class="d-flex flex-column ms-auto" style="margin-top: -10px;">
+                <form action="{% url 'projects:delete_user_event' event_id=event.pk %}" method="POST" style="display:inline;" onsubmit="return confirmDelete()">
+                {% csrf_token %}
+                    <button type="submit" class="btn btn-danger m-1" style="white-space: nowrap;"><small>Delete</small></button>
+                </form>
+<!--                <a href="#" class="btn btn-dark m-1" style="white-space: nowrap;">Delete Event</a>-->
+            </div>
+        </li>
+        </a>
+        {% empty %}
+        <li class="list-group-item">No events found</li>
+        {% endfor %}
+    </ul>
+</div>
+    <div class="card-footer bg-dark text-white">
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1">&laquo; First</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+                <a class="page-link" href="#">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</a>
+            </li>
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+        </div>
+
+</div>
+{% endblock %}

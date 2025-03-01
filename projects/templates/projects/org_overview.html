@@ -1,0 +1,68 @@
+{% extends "./org_base.html" %}
+
+{% block content_inner %}
+            <div class="card mt-4 rounded border-0 shadow-none border-bottom">
+            <div class="card-header d-flex text-white bg-dark justify-content-between">
+        <h3 class="ps-2 py-2 fw-light">Overview</h3>
+            </div>
+           <div class="card-body m-2 mx-4">
+
+
+              <!-- Display the overview for everyone -->
+    <div id="overview-text" class="">
+        <p>{{ organization.description }}</p>
+    </div>
+
+    {% if can_edit %}
+        <!-- Only show the Edit Overview button to users who have permission to edit -->
+        <button id="edit-overview-btn" class="btn btn-dark">Edit Overview</button>
+
+        <!-- Save and Cancel buttons, hidden initially -->
+        <button type="button" id="save-changes-btn" class="btn btn-success mt-3" style="display: none;">Save Changes</button>
+        <button type="button" id="cancel-edit-btn" class="btn btn-danger mt-3" style="display: none;">Cancel</button>
+    {% endif %}
+
+    <form id="overview-form" method="post" action="{% url 'projects:update_overview' organization.id %}" style="display: none;">
+        {% csrf_token %}
+        <input type="hidden" name="description" id="description-input">
+    </form>
+    </div>
+        </div>
+
+
+
+
+
+<script>
+    document.getElementById('edit-overview-btn')?.addEventListener('click', function() {
+        // Replace the overview text with a textarea for editing
+        const overviewTextDiv = document.getElementById('overview-text');
+        const currentDescription = overviewTextDiv.innerText.trim();
+        overviewTextDiv.innerHTML = `<textarea id="description-textarea" class="form-control">${currentDescription}</textarea>`;
+
+        // Show Save and Cancel buttons, hide Edit button
+        document.getElementById('save-changes-btn').style.display = 'inline-block';
+        document.getElementById('cancel-edit-btn').style.display = 'inline-block';
+        this.style.display = 'none';
+    });
+
+    document.getElementById('save-changes-btn')?.addEventListener('click', function() {
+        // Copy textarea content to hidden form input and submit the form
+        const description = document.getElementById('description-textarea').value;
+        document.getElementById('description-input').value = description;
+        document.getElementById('overview-form').submit();
+    });
+
+    document.getElementById('cancel-edit-btn')?.addEventListener('click', function() {
+        // Restore original text and hide Save/Cancel buttons
+        const overviewTextDiv = document.getElementById('overview-text');
+        const currentDescription = "{{ organization.description|escapejs }}";
+        overviewTextDiv.innerHTML = `<p>${currentDescription}</p>`;
+
+        // Show Edit button and hide Save/Cancel buttons
+        document.getElementById('edit-overview-btn').style.display = 'inline-block';
+        document.getElementById('save-changes-btn').style.display = 'none';
+        document.getElementById('cancel-edit-btn').style.display = 'none';
+    });
+</script>
+{% endblock content_inner %}

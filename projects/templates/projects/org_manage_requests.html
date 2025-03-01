@@ -1,0 +1,34 @@
+{% extends "./org_base.html" %}
+{% load static %}
+
+{% block content_inner %}
+<div class="card mt-4 border-0 rounded shadow-none border-bottom">
+    <div class="card-header bg-dark text-white">
+        <h3 class="fw-light ps-2 py-3 pb-2">Pending Join Requests</h3>
+    </div>
+    <div class="card-body">
+        {% if join_requests %}
+            {% for request in join_requests %}
+            <div class="mb-3">
+                <p>
+                    <strong>{{ request.user.username }} ({{ request.user.email }})</strong> 
+                    wants to join {{ request.organization.name }}.
+                </p>
+                {% if not user.is_pma_admin %}
+                <form method="POST" action="{% url 'projects:update_request_status' request.id 'approved' %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">Approve</button>
+                </form>
+                <form method="POST" action="{% url 'projects:update_request_status' request.id 'rejected' %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Reject</button>
+                </form>
+                {%endif%}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No pending join requests at the moment.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock content_inner %}

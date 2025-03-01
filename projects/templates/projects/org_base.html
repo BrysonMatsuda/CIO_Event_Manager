@@ -1,0 +1,233 @@
+{% extends "./generic.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mt-3 mb-3 m-3">
+
+        <nav id="sidebar" class="p-0 rounded-start col-md-3 col-lg-2 d-md-block bg-dark text-white">
+            <div class="sidebar-sticky pt-3">
+                <button class="ms-3 btn  btn-toggle d-md-none mb-3 p-2 px-4 bg-light " onclick="this.style.color = 'grey';" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
+                        aria-label="Toggle">
+                </button>
+
+
+                <div class="collapse navbar-collapse d-md-block w-100" id="sidebarMenu">
+                    <h5 class="text-white pe-3 ps-3">Menu</h5>
+                    <hr>
+
+                    <ul class=" nav nav-pills flex-column w-100 mb-4">
+                        <li class="text-start nav-item card-hover">
+                            <a class="nav-link text-decoration-none text-white" href="{% url 'projects:org_overview' organization.id %}">Overview</a>
+                        </li>
+                        <li class="text-start nav-item card-hover">
+                            <a class="nav-link text-decoration-none text-white" href="{% url 'projects:org_members' organization.id %}">Members</a>
+                        </li>
+                        {% if user == organization.owner or is_moderator or user.is_pma_admin or user_is_moderator%}
+                        <li class="text-start nav-item card-hover">
+                            <a class="nav-link text-decoration-none text-white" href="{% url 'projects:org_manage_requests' organization.id %}">Manage Join Requests</a>
+                        </li>
+                        {% endif %}
+                        <li class="text-start nav-item card-hover">
+                            <a class="nav-link text-decoration-none text-white" href="{% url 'projects:members_org_events' organization.id %}">Events</a>
+
+                        </li>
+                        {% if user == organization.owner or is_moderator or user_is_moderator %}
+
+                        <li class="text-start nav-item card-hover">
+                            <a class="nav-link text-decoration-none text-white" href="{% url 'projects:org_settings' organization.id %}">Settings</a>
+                        </li>
+                        {%endif%}
+                         <li class="text-start nav-item card-hover">
+                            <a class="nav-link text-decoration-none text-white" href="{% url 'projects:club_files' organization_id=organization.id %}">View/Upload Files</a>
+                        </li>
+                    </ul>
+                    <h5 class="text-white ps-3 pe-3">Chat</h5>
+                    <hr><ul class="nav nav-pills flex-column mb-4">
+                        <li class="nav-item card-hover">
+                            <a class="nav-link text-decoration-none text-white" href="{% url 'projects:organization_detail' organization.id %}" onclick="loadChat('announcements')">Announcements</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-decoration-none text-white card-hover" href="{% url 'projects:organization_detail' organization.id %}" onclick="loadChat('general')">General</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-decoration-none text-white card-hover" href="{% url 'projects:organization_detail' organization.id %}" onclick="loadChat('project')">Project</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-decoration-none text-white card-hover" href="{% url 'projects:organization_detail' organization.id %}" onclick="loadChat('support')">Support</a>
+                        </li>
+                        {% if user == organization.owner or user in moderator or is_moderator or user.is_pma_admin or user_is_moderator %}
+                        <li class="nav-item card-hover">
+                            <a class="nav-link text-decoration-none text-white" href="{% url 'projects:organization_detail' organization.id %}" onclick="loadChat('exec')">Executive</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+
+        <div class="col-md-9 col-lg-10 p-5 bg-light rounded-end">
+            <div class="row">
+                <h1 class="col-lg-7 col-md-6 col-sm-12"><strong> {{ organization.organization_name }}</strong></h1>
+                <div class="col-lg-5 col-md-6 col-sm-12 text-end">
+                    <h6>Created by <strong>{{ organization.owner }}</strong></h6>
+                    <div class="text-muted">Date Created: {{ organization.date_created }}</div>
+                </div>
+            </div>
+            <hr>
+           {% block content_inner %}
+            {% endblock content_inner %}
+        </div>
+    </div>
+</div>
+
+<script>
+    const isOwnerOrModerator = "{{ user_is_owner }}" === "True" || "{{ user_is_moderator }}" === "True";
+    const organizationId = "{{ organization.id }}";
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedChatType = localStorage.getItem('currentChat');
+        if (savedChatType) {
+            loadChat(savedChatType);
+        } 
+        else { // load chat if no memory
+            loadChat('announcements')
+        }
+    });
+
+    function loadChat(chatType) {
+    localStorage.setItem('currentChat', chatType);
+
+    const organizationId = '{{ organization.id }}';
+
+    const chatDisplay = document.getElementById('chat-display');
+    if(chatDisplay) {
+        chatDisplay.style.display = 'block';
+    }
+    document.getElementById('chat-title').innerText = chatType.charAt(0).toUpperCase() + chatType.slice(1) + ' Chat';
+
+    fetch(`/fetch_chat_messages/${organizationId}/${chatType}/`)
+    .then(response => response.json())
+    .then(data => {
+        const chatMessages = document.getElementById('chat-messages');
+        chatMessages.innerHTML = '';
+        const reverseMessages = data.messages.reverse();
+        reverseMessages.forEach((msg, index) => {
+            let readByDisplay = '';
+
+            if (index === reverseMessages.length - 1 && msg.read_by.length > 0) {
+                if (msg.read_by.length > 3) {
+                    const condensedNames = msg.read_by.slice(0, 3).join(', ') + '...';
+                    readByDisplay = `<span class="read-by-condensed" data-bs-toggle="tooltip" title="${msg.read_by.join(', ')}">Read By: ${condensedNames}</span>`;
+                } else {
+                    readByDisplay = `<span class="read-by-condensed">Read By: ${msg.read_by.join(', ')}</span>`;
+                }
+            }
+            const timeAgo = timeAgoSince(msg.timestamp)
+
+            chatMessages.innerHTML += `
+                <div class="d-flex justify-content-between align-items-center my-2 p-2 border-bottom">
+                    <div class="message-content">
+                        <strong>${msg.user}:</strong> ${msg.message}
+                        <small class="text-muted">${timeAgo}</small>
+                    </div>
+                    <div class="text-end text-muted read-by-container">
+                        ${readByDisplay}
+                    </div>
+                </div>`;
+        });
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+
+    const chatForm = document.getElementById('chat-form');
+    if (chatType === 'announcements'){
+        if(isOwnerOrModerator){
+            chatForm.style.display = 'block';
+        }
+        else{
+            chatForm.style.display = 'none';
+        }
+    }
+    // if (chatType === 'announcements' && !isOwnerOrModerator) {
+    //     chatForm.style.display = 'none';
+    // } else {
+    //     chatForm.style.display = 'block';
+    // }
+
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+}
+function timeAgoSince(timestamp) {
+    const now = new Date();
+    const messageTime = new Date(timestamp);
+    const diffInSeconds = Math.floor((now - messageTime) / 1000);
+
+    if (diffInSeconds < 60) {
+        return `${diffInSeconds} second${diffInSeconds === 1 ? '' : 's'} ago`;
+    }
+
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) {
+        return `${diffInMinutes} minute${diffInMinutes === 1 ? '' : 's'} ago`;
+    }
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) {
+        return `${diffInHours} hour${diffInHours === 1 ? '' : 's'} ago`;
+    }
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays} day${diffInDays === 1 ? '' : 's'} ago`;
+}
+
+function sendMessage() {
+    const messageInput = document.getElementById('message-input');
+    const chatType = localStorage.getItem('currentChat');
+    const organizationId = '{{ organization.id }}';
+
+    fetch(`/send-message/${organizationId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}',
+        },
+        body: JSON.stringify({
+            chat_type: chatType,
+            message: messageInput.value,
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Update chat view with the new message
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML += `<p><strong>You:</strong> ${messageInput.value} <small class="text-muted">Just now</small></p>`;
+            messageInput.value = '';  // Clear the input field
+            chatMessages.scrollTop = chatMessages.scrollHeight;  // Scroll to the bottom
+        } else {
+            console.error('Error sending message:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+</script>
+
+<style>
+@media (min-width: 769px) {
+    #sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh; /* Ensure full-height sidebar */
+        overflow-y: auto; /* Add scrolling if content overflows */
+    }
+}
+
+</style>
+{%endblock%}

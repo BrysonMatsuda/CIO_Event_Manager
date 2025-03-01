@@ -1,0 +1,72 @@
+{% extends "./org_base.html" %}
+{% load static %}
+{% block content_inner %}
+<div class="card mt-4 rounded border-0 shadow-none border-bottom">
+    <div class="card-header d-flex text-white bg-dark justify-content-between">
+        <h3 class="ps-2 py-2 fw-light">Settings</h3>
+    </div>
+    <div class="card-body m-2">
+        <h2>Organization Settings</h2>
+        <form method="post" enctype="multipart/form-data" action="{% url 'projects:org_settings' organization.id %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                {% if error_message %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error_message }}
+                </div>
+                {% endif %}
+                <div class="">
+                    <img
+                        id="thumbnail-preview"
+                        src="{% if organization.thumbnail %}{{ organization.thumbnail.url }}{% else %}../../static/projects/image.jpg{% endif %}"
+                        alt="Thumbnail Preview"
+                        class="img-thumbnail mt-2"
+                        style="max-width: 150px;"
+                    >
+                </div>
+                <label for="thumbnail" class="form-label">Change Organization Thumbnail</label>
+                <input type="file" id="thumbnail" name="thumbnail" class="form-control" accept=".jpg, .jpeg, .png, .gif" onchange="previewThumbnail(event)">
+            </div>
+            <div class="mb-3">
+                <label for="org_name" class="form-label">Change Organization Name</label>
+                <input type="text" id="org_name" name="org_name" class="form-control" value="{{ organization.organization_name }}">
+            </div>
+            <button type="submit" class="btn btn-success mt-3">Save Changes</button>
+        </form>
+    </div>
+    {% if organization.owner == user %}
+    <div class="card-body m-2">
+        <div>
+            <h2>Organization Deletion</h2>
+            <small><em>This will permanently delete the organization and any associated files, chats, and events</em></small>
+        </div>
+        <form class="mt-auto" method="POST"
+            action="{% url 'projects:delete_organization' organization.id %}"
+            onsubmit="return confirm('Are you sure you want to PERMANENTLY delete this organization? This action cannot be undone!');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger mt-3">Delete Organization</button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// update the thumbnail preview
+function previewThumbnail(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('thumbnail-preview');
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result; // update preview
+        };
+        reader.readAsDataURL(file);
+    } else {
+        // reset preview when no file selected
+        preview.src = "../../static/projects/image.jpg";
+    }
+}
+</script>
+
+{% endblock content_inner %}

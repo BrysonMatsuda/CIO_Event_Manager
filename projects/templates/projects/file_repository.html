@@ -1,0 +1,29 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="border-bottom">File Repository</h2>
+
+    <ul class="list-group mb-4">
+        {% for file in files %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ file.name or file.file.name }}</strong> <br>
+                <a href="{{ file.file.url }}" download class="btn btn-outline-primary mt-2">Download</a>
+            </div>
+        </li>
+        {% empty %}
+        <li class="list-group-item">No files uploaded yet.</li>
+        {% endfor %}
+    </ul>
+
+    <form method="post" enctype="multipart/form-data" class="mt-4">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_file">Select a File</label>
+            <input type="file" name="file" id="id_file" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-dark mt-2">Upload File</button>
+    </form>
+</div>
+{% endblock %}
